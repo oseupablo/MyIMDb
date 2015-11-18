@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <RelativeLayout
+        android:id="@+id/icon_image_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="25dp"/>
+
+        <ImageView
+            android:id="@+id/icon_image"
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:scaleType="fitCenter"
+            android:layout_marginLeft="10dp"
+            tools:src="@drawable/narcos_ret"
+            />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/icon_image_layout"
+        android:layout_alignTop="@id/icon_image_layout"
+        android:layout_alignBottom="@id/icon_image_layout"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        style="@style/ListItemStyle"
+        tools:text="Narcos"/>
+</RelativeLayout>
