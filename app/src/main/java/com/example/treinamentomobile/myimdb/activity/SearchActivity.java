@@ -25,12 +25,15 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
-import org.w3c.dom.Text;
 
 import java.util.List;
 
 /**
- * Created by treinamentomobile on 11/18/15.
+ * Created by phsil on 11/18/15.
+ * Activity that implements and handles a list of Shows.
+ * Performs actions to fetch data using an service and
+ * from SQLite. All costly operations are made in background
+ * and idle time in the app is handled by a progress bar.
  */
 @EActivity(R.layout.search_activity)
 @OptionsMenu(R.menu.main)
@@ -42,9 +45,20 @@ public class SearchActivity extends AppCompatActivity {
 //    private static final long ONE_HOUR = 60 * 60 * 1000;
     private static final long ONE_HOUR = 10 * 1000;
 
+    /**
+     * To access shared preferences with android annotations
+     * you should implement an interface and annotated it with
+     *
+     * @SharedPref annotation.
+     */
     @Pref
     MyPrefs_ prefs;
 
+    /**
+     * To get reference of any view using an id, you should
+     * annotate the view attribute with @ViewById annotation.
+     * Once done, you can access and use the attribute normally.
+     */
     @ViewById
     ListView showsList;
 
@@ -54,6 +68,12 @@ public class SearchActivity extends AppCompatActivity {
     @ViewById
     TextView error;
 
+    /**
+     * If a class is not a standard Android component(such as
+     * an Activity or a Service) you can use @EBean annotation
+     * to enhance it. Then use @Bean to inject them to another class
+     * or Android component
+     */
     @Bean
     public ListShowAdapter adapter;
 
@@ -62,13 +82,12 @@ public class SearchActivity extends AppCompatActivity {
     /**
      * The method init is executed after all views
      * got referenced. In that moment, all declared view
-     * and assigned with @ViewById can be accessed and used
+     * and assigned with @ViewById can be accessed and used.
      */
     @AfterViews
     public void init() {
         fetchData();
     }
-
 
     /**
      * Fetch data to populate only the list view of shows.
@@ -131,12 +150,28 @@ public class SearchActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Listens to the action annotated with @Receiver annotation
+     * In this case, listen to when all data for the show list
+     * were fetched from the server through of ShowIntentService.
+     * Once receive the action, fetch the updated data from DB
+     */
     @Receiver(actions = {ShowIntentService.ACTION_SHOW_LIST_SAVE_DONE})
     public void fillViews() {
         fetchDataFromDB(false);
     }
 
 
+    /**
+     * Executes an all query to the showinfo table
+     * Shows an alert dialog if showDialog params is true.
+     * Simply uses @Background annotation to perform in
+     * background because this can be a costly
+     * operation and then can not be processed on
+     * UIThread.
+     *
+     * @param showDialog
+     */
     @Background
     public void fetchDataFromDB(boolean showDialog) {
         mShows = new Select()
@@ -172,6 +207,13 @@ public class SearchActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    /**
+     * Utility to set the adapter for the showsList and
+     * once the adapter is assigned to the list, the
+     * progress bar can be disabled.
+     *
+     * @param adapter
+     */
     @UiThread
     public void setListAdapter(ListShowAdapter adapter) {
         showsList.setAdapter(adapter);
