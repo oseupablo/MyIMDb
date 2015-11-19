@@ -194,8 +194,9 @@ public class SearchActivity extends AppCompatActivity {
     @UiThread
     public void showWarningDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("You are without internet connection, despite that" +
-                "we are getting saved data in your device that might not be update!")
+        builder.setMessage("You are without internet connection, despite that, " +
+                "we are getting saved data in your device that might not be update and " +
+                "some resources maybe not work properly!")
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override

@@ -11,11 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by treinamentomobile on 11/18/15.
+ * Created by phsil on 11/18/15.
+ * This is a generic BaseAdapter
+ * Can be used by any list which uses an adapter with
+ * this format. Must implement getView method. Uses
+ * android annotation to enable @Bean injection in non
+ * standard android components and to hadle some
+ * dependencies.
  */
 @EBean
 public abstract class AABaseAdapter<T> extends BaseAdapter {
 
+    /**
+     * Injection of the root context
+     */
     @RootContext
     Context context;
 
@@ -48,6 +57,11 @@ public abstract class AABaseAdapter<T> extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    /**
+     * @UiThread annotation guarantees that
+     * this method will be called from Main thread
+     * despite any background tasks were executing
+     */
     @Override
     @UiThread
     public void notifyDataSetChanged() {

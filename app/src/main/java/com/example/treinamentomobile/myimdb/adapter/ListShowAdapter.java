@@ -1,5 +1,6 @@
 package com.example.treinamentomobile.myimdb.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,11 @@ import java.util.List;
 @EBean
 public class ListShowAdapter extends AABaseAdapter<ShowInfo> {
 
+    private ViewHolder holder;
+    private ShowInfo item;
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-        final View loading;
-
         if(convertView == null) {
             convertView = View.inflate(context, R.layout.show_list_row, null);
             holder = new ViewHolder();
@@ -37,27 +38,20 @@ public class ListShowAdapter extends AABaseAdapter<ShowInfo> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        loading = convertView.findViewById(R.id.loading);
 
-        ShowInfo item = getItem(position);
-        loading.setVisibility(View.VISIBLE);
-        Picasso.with(context)
-                .load(item.getMedium_image())
-                .into(holder.icon, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        loading.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
-
-        holder.name.setText(item.getName());
+        item = getItem(position);
+        bindViews();
 
         return convertView;
+    }
+
+    private void bindViews() {
+        Picasso.with(context)
+                .load(item.getMedium_image())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder)
+                .into(holder.icon);
+        holder.name.setText(item.getName());
     }
 
     static class ViewHolder {
