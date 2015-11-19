@@ -16,7 +16,7 @@ import java.util.List;
  * Can be used by any list which uses an adapter with
  * this format. Must implement getView method. Uses
  * android annotation to enable @Bean injection in non
- * standard android components and to hadle some
+ * standard android components and to handle some
  * dependencies.
  */
 @EBean
@@ -52,6 +52,10 @@ public abstract class AABaseAdapter<T> extends BaseAdapter {
         return list;
     }
 
+    /**
+     *
+     * @param newList
+     */
     public void setList(List<T> newList) {
         list = newList;
         notifyDataSetChanged();

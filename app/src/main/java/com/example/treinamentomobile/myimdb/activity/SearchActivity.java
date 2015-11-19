@@ -3,8 +3,11 @@ package com.example.treinamentomobile.myimdb.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
@@ -20,7 +23,9 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.OptionsMenu;
+import org.androidannotations.annotations.OptionsMenuItem;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
@@ -37,7 +42,7 @@ import java.util.List;
  */
 @EActivity(R.layout.search_activity)
 @OptionsMenu(R.menu.main)
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     /**
      * Define the interval for data service fetching
@@ -67,6 +72,14 @@ public class SearchActivity extends AppCompatActivity {
 
     @ViewById
     TextView error;
+
+    /**
+     * To get reference of a menu item, you should annotate
+     * the MenuItem attribute with @OptionsMenuItem and after
+     * override onCreateOptionsMenu
+     */
+    @OptionsMenuItem
+    MenuItem menuSearch;
 
     /**
      * If a class is not a standard Android component(such as
@@ -249,4 +262,57 @@ public class SearchActivity extends AppCompatActivity {
         return lastUpdate < intervalTime;
     }
 
+    /**
+     * Handles list item click event using @ItemClick
+     * annotation. Can receive the position if it were
+     * needed.
+     * Starts a new activity based on ShowInfo ID from
+     * item clicked.
+     * @param position
+     */
+    @ItemClick(R.id.shows_list)
+    public void onListItemClick(int position) {
+        ShowInfo showInfo = adapter.getItem(position);
+        int id = showInfo.get_Id();
+        MainActivity_.intent(this).showId(id).start();
+    }
+
+    /**
+     * Get the searchView reference from menu and
+     * set the query text listener to this activity.
+     * @param menu
+     * @return True if the menu should be displayed.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean b = super.onCreateOptionsMenu(menu);
+
+        SearchView searchView = (SearchView) menuSearch.getActionView();
+        searchView.setOnQueryTextListener(this);
+
+        return b;
+    }
+
+    /**
+     * Uses a query string to filter the list view
+     * @param query
+     * @return true if the query was handled by the listener.
+     */
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        adapter.getFilter().filter(query);
+        return true;
+    }
+
+    /**
+     * Listen to text changes on SearchView and automatically
+     * filter the list view.
+     * @param newText
+     * @return true if the change was handled by the listener.
+     */
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        adapter.getFilter().filter(newText);
+        return true;
+    }
 }
