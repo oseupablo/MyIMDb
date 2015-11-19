@@ -12,10 +12,13 @@ import android.widget.TextView;
 
 import com.example.treinamentomobile.myimdb.R;
 import com.example.treinamentomobile.myimdb.model.ShowInfo;
+import com.example.treinamentomobile.myimdb.service.ShowIntentService;
+import com.example.treinamentomobile.myimdb.service.ShowIntentService_;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.EBean;
+import org.androidannotations.annotations.Receiver;
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
@@ -110,13 +113,29 @@ public class ListShowAdapter extends AABaseAdapter<ShowInfo> implements Filterab
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             filteredModelItemsArray = (ArrayList<ShowInfo>) results.values;
-            notifyDataSetChanged();
-            getList().clear();
-            for(int i = 0, l = filteredModelItemsArray.size(); i < l; i++)
-                getList().add(filteredModelItemsArray.get(i));
-            notifyDataSetInvalidated();
+            if(filteredModelItemsArray.size() > 0) {
+                setResults(filteredModelItemsArray);
+            } else {
+                ShowIntentService_.intent(context).searchShow(constraint.toString()).start();
+            }
         }
     }
+
+    private void setResults(List<ShowInfo> shows) {
+        notifyDataSetChanged();
+        getList().clear();
+        for (int i = 0, l = shows.size(); i < l; i++)
+            getList().add(shows.get(i));
+        notifyDataSetInvalidated();
+    }
+
+    public void setResults(ShowInfo show) {
+        notifyDataSetChanged();
+        getList().clear();
+        getList().add(show);
+        notifyDataSetInvalidated();
+    }
+
 
     static class ViewHolder {
         ImageView icon;

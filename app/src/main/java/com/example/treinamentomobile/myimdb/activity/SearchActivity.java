@@ -3,6 +3,7 @@ package com.example.treinamentomobile.myimdb.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,7 @@ import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.OptionsMenuItem;
 import org.androidannotations.annotations.Receiver;
+import org.androidannotations.annotations.ServiceAction;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
@@ -49,6 +51,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
 //    private static final long ONE_HOUR = 60 * 60 * 1000;
     private static final long ONE_HOUR = 10 * 1000;
+    private static final long TWO_SECONDS = 2000;
 
     /**
      * To access shared preferences with android annotations
@@ -80,6 +83,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @OptionsMenuItem
     MenuItem menuSearch;
+
+    private SearchView searchView;
 
     /**
      * If a class is not a standard Android component(such as
@@ -174,6 +179,23 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         fetchDataFromDB(false);
     }
 
+
+    @Receiver(actions = {ShowIntentService.ACTION_SEARCH_DONE})
+    public void onSearchSuccess(@Receiver.Extra int showId) {
+        adapter.setResults(fetchSearchResultFromDB(showId));
+    }
+
+    private ShowInfo fetchSearchResultFromDB(int id) {
+        ShowInfo showInfo = new ShowInfo();
+        showInfo = showInfo.getById(id);
+
+        return showInfo;
+    }
+
+    @Receiver(actions = {ShowIntentService.ACTION_SHOW_LIST_SAVE_FAIL})
+    public void onSearchFailed() {
+
+    }
 
     /**
      * Executes an all query to the showinfo table
@@ -287,7 +309,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean b = super.onCreateOptionsMenu(menu);
 
-        SearchView searchView = (SearchView) menuSearch.getActionView();
+        searchView = (SearchView) menuSearch.getActionView();
         searchView.setOnQueryTextListener(this);
 
         return b;
@@ -312,6 +334,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @Override
     public boolean onQueryTextChange(String newText) {
+        searchView.setInputType(InputType.TYPE_NULL);
         adapter.getFilter().filter(newText);
         return true;
     }

@@ -20,4 +20,7 @@ public interface RestConnection {
     @Get("/shows")
     List<ShowInfo> getShows();
 
+    @Get("/search/shows?q=:{name}")
+    List<ShowInfo> getShowResults(String name);
+
 }

@@ -25,6 +25,10 @@ public class ShowIntentService extends AbstractIntentService {
     public static final String ACTION_EPISODES_SAVE_DONE = "ACTION_EPISODES_SAVE_DONE";
     public static final String ACTION_CAST_SAVE_DONE = "ACTION_CAST_SAVE_DONE";
     public static final String ACTION_SHOW_LIST_SAVE_DONE = "ACTION_SHOW_LIST_SAVE_DONE";
+    public static final String ACTION_SEARCH_DONE = "ACTION_SEARCH_DONE";
+    public static final String ACTION_SHOW_LIST_SAVE_FAIL = "ACTION_SHOW_LIST_SAVE_FAIL";
+    public static final String ACTION_SEARCH_FAIL = "ACTION_SEARCH_FAIL";
+    public static final String SHOW_ID = "com.example.treinamentomobile.myimdb.service.show_id";
 
     @RestService
     RestConnection connection;
@@ -40,6 +44,43 @@ public class ShowIntentService extends AbstractIntentService {
     @ServiceAction
     void fetchAndSaveShows() {
         final List<ShowInfo> shows = connection.getShows();
+
+        if(saveShows(shows)) {
+            sendBroadcast(ACTION_SHOW_LIST_SAVE_DONE);
+            prefs.lastUpdate().put(System.currentTimeMillis());
+        } else {
+            sendBroadcast(ACTION_SHOW_LIST_SAVE_FAIL);
+        }
+    }
+
+    @ServiceAction
+    void searchShow(String name) {
+        final List<ShowInfo> shows = connection.getShowResults(name);
+
+        if(saveShows(shows)) {
+            int id = shows.get(0).get_Id();
+            sendBroadcast(ACTION_SEARCH_DONE, id);
+        } else {
+            sendBroadcast(ACTION_SEARCH_FAIL);
+        }
+
+    }
+
+    private void sendBroadcast(String action) {
+        Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
+    private void sendBroadcast(String action, int id) {
+        Intent intent = new Intent(action);
+        intent.putExtra(SHOW_ID, id);
+        sendBroadcast(intent);
+    }
+
+    private boolean saveShows(List<ShowInfo> shows) {
+        if(shows.size() == 0)
+            return false;
+
         ActiveAndroid.beginTransaction();
         try {
             for (ShowInfo show : shows) {
@@ -49,13 +90,12 @@ public class ShowIntentService extends AbstractIntentService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             ActiveAndroid.setTransactionSuccessful();
         }
         ActiveAndroid.endTransaction();
 
-        Intent intent = new Intent(ACTION_SHOW_LIST_SAVE_DONE);
-        sendBroadcast(intent);
-        prefs.lastUpdate().put(System.currentTimeMillis());
+        return true;
     }
 }
