@@ -334,7 +334,6 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @Override
     public boolean onQueryTextChange(String newText) {
-        searchView.setInputType(InputType.TYPE_NULL);
         adapter.getFilter().filter(newText);
         return true;
     }
