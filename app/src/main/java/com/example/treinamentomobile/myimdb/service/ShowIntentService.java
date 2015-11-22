@@ -4,6 +4,7 @@ import android.content.Intent;
 
 import com.activeandroid.ActiveAndroid;
 import com.example.treinamentomobile.myimdb.connection.RestConnection;
+import com.example.treinamentomobile.myimdb.model.SearchShow;
 import com.example.treinamentomobile.myimdb.model.ShowInfo;
 import com.example.treinamentomobile.myimdb.util.MyPrefs_;
 
@@ -13,6 +14,7 @@ import org.androidannotations.annotations.rest.RestService;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 import org.androidannotations.api.support.app.AbstractIntentService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +44,7 @@ public class ShowIntentService extends AbstractIntentService {
     }
 
     @ServiceAction
-    void fetchAndSaveShows() {
+    public void fetchAndSaveShows() {
         final List<ShowInfo> shows = connection.getShows();
 
         if(saveShows(shows)) {
@@ -54,8 +56,9 @@ public class ShowIntentService extends AbstractIntentService {
     }
 
     @ServiceAction
-    void searchShow(String name) {
-        final List<ShowInfo> shows = connection.getShowResults(name);
+    public void searchShow(String name) {
+        final List<SearchShow> results = connection.getShowResults(name);
+        final List<ShowInfo> shows = getShowsFromSearchedShows(results);
 
         if(saveShows(shows)) {
             int id = shows.get(0).get_Id();
@@ -65,6 +68,17 @@ public class ShowIntentService extends AbstractIntentService {
         }
 
     }
+
+    private List<ShowInfo> getShowsFromSearchedShows(List<SearchShow> results) {
+        List<ShowInfo> shows = new ArrayList<>();
+
+        for (SearchShow result : results) {
+            shows.add(result.getShow());
+        }
+
+        return shows;
+    }
+
 
     private void sendBroadcast(String action) {
         Intent intent = new Intent(action);

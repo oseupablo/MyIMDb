@@ -2,6 +2,7 @@ package com.example.treinamentomobile.myimdb.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.Menu;
@@ -33,6 +34,7 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,7 +76,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     View loading;
 
     @ViewById
-    TextView error;
+    TextView noInternet;
+
+    @ViewById
+    TextView noResults;
 
     /**
      * To get reference of a menu item, you should annotate
@@ -83,8 +88,6 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @OptionsMenuItem
     MenuItem menuSearch;
-
-    private SearchView searchView;
 
     /**
      * If a class is not a standard Android component(such as
@@ -95,7 +98,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Bean
     public ListShowAdapter adapter;
 
-    private List<ShowInfo> mShows = null;
+    private SearchView searchView;
+    private boolean searching;
+    private List<ShowInfo> mShows;
 
     /**
      * The method init is executed after all views
@@ -104,6 +109,11 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @AfterViews
     public void init() {
+        noResults.setVisibility(View.GONE);
+        noInternet.setVisibility(View.GONE);
+        searching = false;
+        mShows = null;
+        adapter.setSa(this);
         fetchData();
     }
 
@@ -130,31 +140,21 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         if (NetworkUtil.getConnectivityStatusReal(getApplicationContext())) {
             if (isUpdateTime(ONE_HOUR)) {
                 ShowIntentService_.intent(this).fetchAndSaveShows().start();
-                dataIsPresent();
-            } else if (isThereAnyDataOnDB()) {
-                fetchDataFromDB(false);
-                dataIsPresent();
             } else {
-                error();
+                if(isThereAnyDataOnDB())
+                    fetchDataFromDB(false);
+                else
+                    ShowIntentService_.intent(this).fetchAndSaveShows().start();
             }
         } else if (isThereAnyDataOnDB()) {
             if (isUpdateTime(ONE_HOUR)) {
                 fetchDataFromDB(true);
-                dataIsPresent();
             } else {
                 fetchDataFromDB(false);
-                dataIsPresent();
             }
         } else {
-            error();
+            noDataToFetch();
         }
-    }
-
-    /**
-     * Sets error view visibility to gone
-     */
-    private void dataIsPresent() {
-        error.setVisibility(View.GONE);
     }
 
     /**
@@ -162,8 +162,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      * it is not possible get any data to
      * populate the view
      */
-    private void error() {
-        showsList.setVisibility(View.GONE);
+    private void noDataToFetch() {
+        showsList.setEmptyView(noInternet);
         loading.setVisibility(View.GONE);
     }
 
@@ -181,8 +181,11 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
 
     @Receiver(actions = {ShowIntentService.ACTION_SEARCH_DONE})
-    public void onSearchSuccess(@Receiver.Extra int showId) {
+    public void onSearchSuccess(Intent intent) {
+        int showId = intent.getIntExtra(ShowIntentService.SHOW_ID, 0);
         adapter.setResults(fetchSearchResultFromDB(showId));
+        loading.setVisibility(View.GONE);
+        searching = false;
     }
 
     private ShowInfo fetchSearchResultFromDB(int id) {
@@ -192,9 +195,13 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         return showInfo;
     }
 
-    @Receiver(actions = {ShowIntentService.ACTION_SHOW_LIST_SAVE_FAIL})
+    @Receiver(actions = {ShowIntentService.ACTION_SEARCH_FAIL})
     public void onSearchFailed() {
-
+        loading.setVisibility(View.GONE);
+        List<ShowInfo> empty = new ArrayList<>();
+        adapter.setResults(empty);
+        showsList.setEmptyView(noResults);
+        searching = false;
     }
 
     /**
@@ -322,7 +329,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @Override
     public boolean onQueryTextSubmit(String query) {
-        adapter.getFilter().filter(query);
+        if(!searching) {
+            showsList.setVisibility(View.VISIBLE);
+            adapter.getFilter().filter(query);
+        }
         return true;
     }
 
@@ -334,7 +344,15 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @Override
     public boolean onQueryTextChange(String newText) {
-        adapter.getFilter().filter(newText);
+        if(!searching) {
+            showsList.setVisibility(View.VISIBLE);
+            adapter.getFilter().filter(newText);
+        }
         return true;
+    }
+
+    public void startSearching() {
+        this.searching = true;
+        loading.setVisibility(View.VISIBLE);
     }
 }

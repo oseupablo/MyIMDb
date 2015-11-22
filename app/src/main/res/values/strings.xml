@@ -3,4 +3,5 @@
     <string name="genres">Biography, Crime, Drama</string>
     <string name="no_internet_connection">You do not have internet connection!</string>
     <string name="menu_search">Search</string>
+    <string name="no_results">No results found.</string>
 </resources>

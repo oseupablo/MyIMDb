@@ -1,5 +1,6 @@
 package com.example.treinamentomobile.myimdb.connection;
 
+import com.example.treinamentomobile.myimdb.model.SearchShow;
 import com.example.treinamentomobile.myimdb.model.ShowInfo;
 
 import org.androidannotations.annotations.rest.Get;
@@ -20,7 +21,7 @@ public interface RestConnection {
     @Get("/shows")
     List<ShowInfo> getShows();
 
-    @Get("/search/shows?q=:{name}")
-    List<ShowInfo> getShowResults(String name);
+    @Get("/search/shows?q={name}")
+    List<SearchShow> getShowResults(String name);
 
 }

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.treinamentomobile.myimdb.R;
+import com.example.treinamentomobile.myimdb.activity.SearchActivity;
 import com.example.treinamentomobile.myimdb.model.ShowInfo;
 import com.example.treinamentomobile.myimdb.service.ShowIntentService;
 import com.example.treinamentomobile.myimdb.service.ShowIntentService_;
@@ -34,8 +35,9 @@ public class ListShowAdapter extends AABaseAdapter<ShowInfo> implements Filterab
     private ViewHolder holder;
     private ShowInfo item;
     private ModelFilter filter;
-    protected List<ShowInfo> allModelItemsArray;
-    protected List<ShowInfo> filteredModelItemsArray;
+    private List<ShowInfo> allModelItemsArray;
+    private List<ShowInfo> filteredModelItemsArray;
+    private SearchActivity sa;
 
 
     @Override
@@ -116,12 +118,13 @@ public class ListShowAdapter extends AABaseAdapter<ShowInfo> implements Filterab
             if(filteredModelItemsArray.size() > 0) {
                 setResults(filteredModelItemsArray);
             } else {
+                sa.startSearching();
                 ShowIntentService_.intent(context).searchShow(constraint.toString()).start();
             }
         }
     }
 
-    private void setResults(List<ShowInfo> shows) {
+    public void setResults(List<ShowInfo> shows) {
         notifyDataSetChanged();
         getList().clear();
         for (int i = 0, l = shows.size(); i < l; i++)
@@ -136,6 +139,9 @@ public class ListShowAdapter extends AABaseAdapter<ShowInfo> implements Filterab
         notifyDataSetInvalidated();
     }
 
+    public void setSa(SearchActivity sa) {
+        this.sa = sa;
+    }
 
     static class ViewHolder {
         ImageView icon;
