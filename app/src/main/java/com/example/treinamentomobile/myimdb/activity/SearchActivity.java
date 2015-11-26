@@ -197,10 +197,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     @Receiver(actions = {ShowIntentService.ACTION_SEARCH_FAIL})
     public void onSearchFailed() {
-        loading.setVisibility(View.GONE);
         List<ShowInfo> empty = new ArrayList<>();
         adapter.setResults(empty);
-        showsList.setEmptyView(noResults);
+        loading.setVisibility(View.GONE);
+        noResults.setVisibility(View.VISIBLE);
         searching = false;
     }
 
@@ -330,7 +330,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Override
     public boolean onQueryTextSubmit(String query) {
         if(!searching) {
-            showsList.setVisibility(View.VISIBLE);
+            noResults.setVisibility(View.GONE);
             adapter.getFilter().filter(query);
         }
         return true;
@@ -345,9 +345,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Override
     public boolean onQueryTextChange(String newText) {
         if(!searching) {
-            showsList.setVisibility(View.VISIBLE);
             adapter.getFilter().filter(newText);
+            noResults.setVisibility(View.GONE);
         }
+
         return true;
     }
 
